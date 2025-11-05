@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Monte Seu Prato - Delícia Gourmet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --white:#ffffff;
@@ -29,19 +28,17 @@ main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2
 .card-content p{color:#64748b;font-size:.9rem;margin-bottom:8px;}
 .price{font-weight:600;color:var(--orange);font-size:1rem;}
 
-/* MODAL */
-.modal-bg{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:10;
-}
+/* Modal */
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:10;}
 .modal{
   background:var(--white);
   border-radius:10px;
   width:95%;max-width:520px;
-  height:85vh;overflow-y:auto;
+  height:85vh;
+  overflow-y:auto;
   margin-top:20px;
-  position:relative;
   animation:fadeIn .25s ease;
+  position:relative;
 }
 .modal img{width:100%;height:200px;object-fit:cover;}
 .modal-content{padding:20px;padding-top:60px;}
@@ -52,16 +49,9 @@ section{margin:20px 0;}
 section h3{color:var(--black);font-size:1rem;margin-bottom:6px;}
 section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 .option{display:flex;align-items:center;gap:8px;margin:6px 0;}
-.option input[type="checkbox"]{
-  accent-color:var(--orange);
-  cursor:pointer;width:18px;height:18px;border-radius:50%;
-  appearance:none;border:2px solid #ccc;position:relative;outline:none;
-}
+.option input[type="checkbox"]{accent-color:var(--orange);cursor:pointer;width:18px;height:18px;border-radius:50%;appearance:none;border:2px solid #ccc;position:relative;outline:none;}
 .option input[type="checkbox"]:checked{border-color:var(--orange);}
-.option input[type="checkbox"]::before{
-  content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;
-  background:var(--orange);opacity:0;transition:.2s;
-}
+.option input[type="checkbox"]::before{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:var(--orange);opacity:0;transition:.2s;}
 .option input[type="checkbox"]:checked::before{opacity:1;}
 .option label{cursor:pointer;}
 .limit-info{text-align:right;font-size:.8rem;color:var(--red);}
@@ -71,8 +61,6 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 #quant{font-weight:600;font-size:1.1rem;}
 .btn-add{width:100%;padding:12px;background:#ddd;color:#999;border:none;border-radius:var(--radius);font-weight:600;text-transform:uppercase;cursor:not-allowed;}
 .btn-active{background:var(--orange);color:var(--white);cursor:pointer;}
-
-/* BOTÃO FIXO */
 .close{
   position:fixed;
   top:12px;right:20px;
@@ -86,10 +74,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
   box-shadow:0 2px 6px rgba(0,0,0,0.3);
   z-index:30;
 }
-
 @keyframes fadeIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
-
-/* Responsivo */
 @media(max-width:600px){
  main{grid-template-columns:repeat(2,1fr);gap:12px;}
  .card img{height:120px;}
@@ -134,49 +119,41 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
-const CACHE_KEY = "monte_prato_cache_v4";
-const CACHE_TIME = 3 * 60 * 60 * 1000; // 3 horas
+const CACHE_KEY = "monte_prato_cache_v3";
+const CACHE_TIME = 3 * 60 * 60 * 1000; // 3h
 
-let cachedData = null;
-let totalObrigatorias = 0;
-let precoBase = 45.00;
-let totalAdicionais = 0;
+let cachedData=null,totalObrigatorias=0;
+let precoBase=45.00,totalAdicionais=0;
+let q=1;
 
-// ===== PRÉ-CARREGA OS ITENS =====
-document.addEventListener("DOMContentLoaded", async ()=>{
-  const cache = localStorage.getItem(CACHE_KEY);
+// Pré-carrega dados
+document.addEventListener("DOMContentLoaded",async()=>{
+  const cache=localStorage.getItem(CACHE_KEY);
   if(cache){
-    const {data,time} = JSON.parse(cache);
-    if(Date.now()-time < CACHE_TIME){
-      cachedData = data;
-      console.log("✅ Itens carregados do cache");
-      return;
-    }
+    const {data,time}=JSON.parse(cache);
+    if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
   }
-  console.log("🔄 Consultando dados do GAS...");
-  const r = await fetch(`${URL_API}?acao=listarItens`);
-  const data = await r.json();
-  cachedData = data;
-  localStorage.setItem(CACHE_KEY, JSON.stringify({data,time:Date.now()}));
+  const r=await fetch(`${URL_API}?acao=listarItens`);
+  const data=await r.json();
+  cachedData=data;
+  localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
 });
 
-// ===== REFERÊNCIAS =====
+// Referências
 const modalBg=document.getElementById('modal-bg');
 const blocos=document.getElementById('blocos');
 const faltamEl=document.getElementById('faltam');
 const btnAdd=document.getElementById('btnAdd');
-const precoBaseEl=document.getElementById('precoBase');
-let q=1;
 const qEl=document.getElementById('quant');
 
-// ===== CONTROLES =====
+// Eventos
 document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
 modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
 document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q;atualizarPreco()};
 document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q;atualizarPreco()}};
 
-// ===== MONTA OS BLOCOS =====
+// Monta blocos
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
@@ -187,13 +164,12 @@ function abrirModal(){
 
 function montarBlocos(data){
   blocos.innerHTML='';
-  totalObrigatorias = Object.keys(data.categorias).length;
-
+  totalObrigatorias=Object.keys(data.categorias).length;
   Object.entries(data.categorias).forEach(([categoria,info],i)=>{
     const sec=document.createElement('section');
     sec.dataset.ok='0';
     sec.innerHTML=`<h3>${categoria}</h3>
-    <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
+      <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
     info.itens.forEach((item,j)=>{
       const id=`${categoria}_${j}`;
       const input=document.createElement('input');
@@ -221,39 +197,26 @@ function gerenciarSelecao(input,sec,info,i){
   const selecionados=[...sec.querySelectorAll('input:checked')];
   const qt=selecionados.length;
   document.getElementById(`sel_${i}`).textContent=qt;
-
   if(qt>=info.maximo){
     sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=true);
-    const prox=sec.nextElementSibling;
-    if(prox)prox.scrollIntoView({behavior:'smooth'});
-  } else {
-    sec.querySelectorAll('input').forEach(el=>el.disabled=false);
-  }
-
-  sec.dataset.ok = qt >= info.minimo ? '1' : '0';
-  atualizarStatus();
-  atualizarPreco();
+    const prox=sec.nextElementSibling;if(prox)prox.scrollIntoView({behavior:'smooth'});
+  }else sec.querySelectorAll('input').forEach(el=>el.disabled=false);
+  sec.dataset.ok=qt>=info.minimo?'1':'0';
+  atualizarStatus();atualizarPreco();
 }
 
 function atualizarPreco(){
-  totalAdicionais = [...blocos.querySelectorAll('input:checked')]
-    .reduce((soma,el)=>soma + Number(el.dataset.adicional||0),0);
-  const total = (precoBase + totalAdicionais) * q;
+  totalAdicionais=[...blocos.querySelectorAll('input:checked')]
+    .reduce((soma,el)=>soma+Number(el.dataset.adicional||0),0);
+  const total=(precoBase+totalAdicionais)*q;
   btnAdd.textContent=`ADICIONAR AO PEDIDO R$ ${total.toFixed(2).replace('.',',')}`;
 }
+
 function atualizarStatus(){
-  const ok = [...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
-  const faltam = totalObrigatorias - ok;
-  if(faltam<=0){
-    faltamEl.style.display='none';
-    btnAdd.classList.add('btn-active');
-    btnAdd.disabled=false;
-  }else{
-    faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;
-    faltamEl.style.display='block';
-    btnAdd.classList.remove('btn-active');
-    btnAdd.disabled=true;
-  }
+  const ok=[...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
+  const faltam=totalObrigatorias-ok;
+  if(faltam<=0){faltamEl.style.display='none';btnAdd.classList.add('btn-active');btnAdd.disabled=false;}
+  else{faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;faltamEl.style.display='block';btnAdd.classList.remove('btn-active');btnAdd.disabled=true;}
 }
 </script>
 </body>
