@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Monte Seu Prato - Delícia Gourmet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
-:root {
-  --white:#ffffff;
+:root{
+  --white:#fff;
   --black:#0b0f19;
   --orange:#ff7b00;
   --red:#e53935;
@@ -19,7 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
 body{background:var(--gray);color:var(--text);}
 header{text-align:center;padding:20px;background:var(--black);color:var(--white);}
-header h1{font-size:1.6rem;font-weight:600;}
+header h1{font-size:1.6rem;font-weight:600;letter-spacing:1px;}
 main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;padding:20px;max-width:1000px;margin:auto;}
 .card{background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,0.08);cursor:pointer;transition:.2s;}
 .card:hover{transform:translateY(-3px);}
@@ -29,15 +28,15 @@ main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2
 .card-content p{color:#64748b;font-size:.9rem;margin-bottom:8px;}
 .price{font-weight:600;color:var(--orange);font-size:1rem;}
 
-/* MODAL */
-.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:10;}
+/* Modal */
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:10;}
 .modal{
   background:var(--white);
   border-radius:10px;
-  width:95%;max-width:520px;
-  height:85vh;
+  width:95%;
+  max-width:520px;
+  max-height:85vh;
   overflow-y:auto;
-  margin-top:20px;
   animation:fadeIn .25s ease;
   position:relative;
 }
@@ -45,7 +44,7 @@ main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2
 .modal-content{padding:20px;padding-top:60px;}
 .modal h2{font-size:1.3rem;margin:10px 0;color:var(--black);}
 .modal .price{color:var(--orange);font-size:1.2rem;margin-bottom:5px;}
-.modal small{color:var(--red);font-size:.85rem;display:flex;align-items:center;gap:5px;}
+.modal small{color:var(--red);font-size:.85rem;}
 .modal hr{border:0;border-top:1px solid #eee;margin:12px 0;}
 section{margin:20px 0;}
 section h3{color:var(--black);font-size:1rem;margin-bottom:6px;}
@@ -74,11 +73,9 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
   position:fixed;
   top:12px;right:20px;
   background:var(--red);
-  border:none;
-  border-radius:50%;
+  border:none;border-radius:50%;
   width:34px;height:34px;
-  color:var(--white);
-  font-size:1.3rem;
+  color:var(--white);font-size:1.3rem;
   cursor:pointer;
   box-shadow:0 2px 6px rgba(0,0,0,0.3);
   z-index:30;
@@ -115,7 +112,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
       <small>🍽️ Delícia Gourmet - Almoço</small>
       <hr>
       <div id="blocos"></div>
-      <div id="faltam">Carregando...</div>
+      <div id="faltam" style="display:none;">Carregando...</div>
       <div class="qty-area">
         <button id="menos">−</button>
         <span id="quant">1</span>
@@ -127,49 +124,50 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 </div>
 
 <script>
-const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
-const CACHE_KEY = "monte_prato_cache_v5";
-const CACHE_TIME = 3 * 60 * 60 * 1000; // 3h
-
+const URL_API="https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
+const CACHE_KEY="monte_prato_cache_v6";
+const CACHE_TIME=3*60*60*1000;
 let cachedData=null,totalObrigatorias=0;
 let precoBase=45.00,totalAdicionais=0,q=1;
 
-// Pré-carrega itens
+// ===== Pré-carregamento =====
 document.addEventListener("DOMContentLoaded",async()=>{
   const cache=localStorage.getItem(CACHE_KEY);
   if(cache){
     const {data,time}=JSON.parse(cache);
     if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
   }
-  const r=await fetch(`${URL_API}?acao=listarItens`);
-  const data=await r.json();
-  cachedData=data;
-  localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+  try{
+    const r=await fetch(`${URL_API}?acao=listarItens`);
+    const data=await r.json();
+    cachedData=data;
+    localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+  }catch(e){console.error("Erro ao carregar dados",e);}
 });
 
-// Referências
+// ===== Referências =====
 const modalBg=document.getElementById('modal-bg');
 const blocos=document.getElementById('blocos');
 const faltamEl=document.getElementById('faltam');
 const btnAdd=document.getElementById('btnAdd');
 const qEl=document.getElementById('quant');
-
-// Ações
 document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
 modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
 document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q;atualizarPreco()};
 document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q;atualizarPreco()}};
 
-// Montagem
+// ===== Abrir modal =====
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
-  if(!cachedData){faltamEl.textContent='Erro ao carregar dados.';return;}
+  faltamEl.style.display='none';
+  if(!cachedData){blocos.innerHTML='<p style="color:red;text-align:center;">Erro ao carregar dados.</p>';return;}
   montarBlocos(cachedData);
   atualizarPreco();
 }
 
+// ===== Montar blocos =====
 function montarBlocos(data){
   blocos.innerHTML='';
   totalObrigatorias=Object.keys(data.categorias).length;
@@ -201,6 +199,7 @@ function montarBlocos(data){
   atualizarStatus();
 }
 
+// ===== Lógica de seleção =====
 function gerenciarSelecao(input,sec,info,i){
   const selecionados=[...sec.querySelectorAll('input:checked')];
   const qt=selecionados.length;
@@ -213,6 +212,7 @@ function gerenciarSelecao(input,sec,info,i){
   atualizarStatus();atualizarPreco();
 }
 
+// ===== Atualizar preço =====
 function atualizarPreco(){
   totalAdicionais=[...blocos.querySelectorAll('input:checked')]
     .reduce((soma,el)=>soma+Number(el.dataset.adicional||0),0);
@@ -220,6 +220,7 @@ function atualizarPreco(){
   btnAdd.textContent=`ADICIONAR AO PEDIDO R$ ${total.toFixed(2).replace('.',',')}`;
 }
 
+// ===== Atualizar status =====
 function atualizarStatus(){
   const ok=[...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
   const faltam=totalObrigatorias-ok;
