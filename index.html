@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Monte Seu Prato - Delícia Gourmet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --white:#ffffff;
@@ -41,10 +40,10 @@ section{margin:20px 0;}
 section h3{color:var(--black);font-size:1rem;margin-bottom:6px;}
 section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 .option{display:flex;align-items:center;gap:8px;margin:6px 0;}
-.option input[type="radio"]{accent-color:var(--orange);cursor:pointer;appearance:none;width:18px;height:18px;border:2px solid #ccc;border-radius:50%;position:relative;outline:none;}
-.option input[type="radio"]:checked{border-color:var(--orange);}
-.option input[type="radio"]::before{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:var(--orange);opacity:0;transition:.2s;}
-.option input[type="radio"]:checked::before{opacity:1;}
+.option input[type="checkbox"]{accent-color:var(--orange);cursor:pointer;width:18px;height:18px;border-radius:50%;appearance:none;border:2px solid #ccc;position:relative;outline:none;}
+.option input[type="checkbox"]:checked{border-color:var(--orange);}
+.option input[type="checkbox"]::before{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:var(--orange);opacity:0;transition:.2s;}
+.option input[type="checkbox"]:checked::before{opacity:1;}
 .option label{cursor:pointer;}
 .limit-info{text-align:right;font-size:.8rem;color:var(--red);}
 #faltam{text-align:center;color:var(--red);margin-top:8px;font-size:.9rem;font-weight:600;}
@@ -101,20 +100,20 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
-const CACHE_KEY = "monte_prato_cache_v1";
+const CACHE_KEY = "monte_prato_cache_v2";
 const CACHE_TIME = 3 * 60 * 60 * 1000; // 3 horas
 
 let cachedData = null;
 let totalObrigatorias = 0;
 
-// carregar itens logo no início
+// ===== PRÉ-CARREGA OS ITENS AO ABRIR O SITE =====
 document.addEventListener("DOMContentLoaded", async ()=>{
   const cache = localStorage.getItem(CACHE_KEY);
   if(cache){
-    const {data, time} = JSON.parse(cache);
-    if(Date.now() - time < CACHE_TIME){
+    const {data,time} = JSON.parse(cache);
+    if(Date.now()-time < CACHE_TIME){
       cachedData = data;
-      console.log("✅ Itens carregados do cache.");
+      console.log("✅ Itens carregados do cache");
       return;
     }
   }
@@ -122,10 +121,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const r = await fetch(`${URL_API}?acao=listarItens`);
   const data = await r.json();
   cachedData = data;
-  localStorage.setItem(CACHE_KEY, JSON.stringify({data, time:Date.now()}));
+  localStorage.setItem(CACHE_KEY, JSON.stringify({data,time:Date.now()}));
 });
 
-// Referências principais
+// ===== REFERÊNCIAS =====
 const modalBg=document.getElementById('modal-bg');
 const blocos=document.getElementById('blocos');
 const faltamEl=document.getElementById('faltam');
@@ -133,14 +132,14 @@ const btnAdd=document.getElementById('btnAdd');
 let q=1;
 const qEl=document.getElementById('quant');
 
-// Controles
+// ===== CONTROLES =====
 document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
 modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
 document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q};
 document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
 
-// Monta o modal com os dados pré-carregados
+// ===== MONTA OS BLOCOS =====
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
@@ -151,19 +150,19 @@ function abrirModal(){
 function montarBlocos(data){
   blocos.innerHTML='';
   totalObrigatorias = Object.keys(data.categorias).length;
+
   Object.entries(data.categorias).forEach(([categoria,info],i)=>{
     const sec=document.createElement('section');
     sec.dataset.ok='0';
     sec.innerHTML=`<h3>${categoria}</h3>
     <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
-    let selecionados=0;
     info.itens.forEach((item,j)=>{
       const id=`${categoria}_${j}`;
       const input=document.createElement('input');
-      input.type="radio";
+      input.type="checkbox"; // todas "bolinhas"
       input.name=categoria;
       input.id=id;
-      input.onclick=()=>toggleRadio(input,sec,info,i);
+      input.onclick=()=>gerenciarSelecao(input,sec,info,i);
       const label=document.createElement('label');
       label.className='option';
       label.appendChild(input);
@@ -172,26 +171,30 @@ function montarBlocos(data){
     });
     const lim=document.createElement('div');
     lim.className='limit-info';
-    lim.textContent=info.maximo>0?`Limite: ${info.maximo}`:'';
+    lim.textContent=`Limite: ${info.maximo}`;
     sec.appendChild(lim);
     blocos.appendChild(sec);
   });
   atualizarStatus();
 }
 
-function toggleRadio(input,sec,info,i){
-  // permite desmarcar radio (toggle)
-  if(input.wasChecked){
-    input.checked=false;
-    input.wasChecked=false;
-  }else{
-    sec.querySelectorAll('input').forEach(r=>r.wasChecked=false);
-    input.wasChecked=true;
+function gerenciarSelecao(input,sec,info,i){
+  const selecionados=[...sec.querySelectorAll('input:checked')];
+  const qt=selecionados.length;
+  document.getElementById(`sel_${i}`).textContent=qt;
+
+  if(qt>=info.maximo){
+    // bloqueia os não selecionados
+    sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=true);
+    // vai pro próximo bloco
+    const prox=sec.nextElementSibling;
+    if(prox)prox.scrollIntoView({behavior:'smooth'});
+  } else {
+    // libera novamente se desmarcou
+    sec.querySelectorAll('input').forEach(el=>el.disabled=false);
   }
 
-  const selecionados=[...sec.querySelectorAll('input:checked')].length;
-  document.getElementById(`sel_${i}`).textContent=selecionados;
-  sec.dataset.ok = selecionados >= info.minimo ? '1' : '0';
+  sec.dataset.ok = qt >= info.minimo ? '1' : '0';
   atualizarStatus();
 }
 
