@@ -5,46 +5,40 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Delivery Delícia Gourmet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-
 <style>
 :root{
   --bg:#0b0f19;--card:#151b28;--gold:#b8860b;
   --text:#f8fafc;--muted:#a5b1c2;--radius:18px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-header{text-align:center;padding:20px;border-bottom:1px solid rgba(255,255,255,0.1)}
-header h1{color:var(--gold);font-family:'Playfair Display',serif;font-size:1.8rem}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+header{text-align:center;padding:20px;border-bottom:1px solid rgba(255,255,255,.1)}
+header h1{color:var(--gold);font-family:'Playfair Display',serif}
 main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;max-width:1100px;margin:auto}
-.card{background:var(--card);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.card{background:var(--card);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.4)}
 .card img{width:100%;height:160px;object-fit:cover}
-.card .badge{position:absolute;top:12px;left:12px;background:var(--gold);color:var(--bg);padding:5px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
 .card-content{padding:15px}
-.card-content h2{font-size:1.1rem;color:var(--text);margin-bottom:6px}
+.card-content h2{font-size:1.1rem;margin-bottom:6px}
 .card-content p{color:var(--muted);font-size:.9rem;margin-bottom:10px;height:36px;overflow:hidden}
 .card-content .price{color:var(--gold);font-weight:600;font-size:1.1rem;text-align:right}
 
-/* MODAL */
+/* Modal */
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10}
-.modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow-y:auto;animation:fadeIn .3s;padding-bottom:20px;position:relative}
+.modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow-y:auto;padding-bottom:20px;position:relative;animation:fadeIn .3s}
 .modal img{width:100%;height:200px;object-fit:cover;border-radius:var(--radius) var(--radius) 0 0}
-.modal h2{font-size:1.3rem;color:var(--text);margin:15px}
-.modal p.price{color:var(--gold);font-size:1.1rem;margin:0 15px 15px;font-weight:600}
-.modal section{margin:0 15px 20px}
-.modal section h3{font-size:1rem;margin-bottom:8px;color:var(--gold)}
-.modal label{display:block;margin:4px 0;color:var(--muted);font-size:.9rem}
-.modal textarea{width:100%;background:#0e1524;color:var(--text);border:1px solid #222;border-radius:var(--radius);padding:10px;min-height:80px}
+.modal h2{margin:15px;font-size:1.3rem;color:var(--text)}
+.modal p.price{color:var(--gold);font-weight:600;margin:0 15px 10px}
+.modal section{margin:0 15px 15px;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:10px}
+.modal section h3{color:var(--gold);margin-bottom:8px}
+.modal label{display:block;margin:4px 0;cursor:pointer}
+.modal .limit-info{font-size:.8rem;color:#ef4444;text-align:right;margin-top:6px}
+.modal textarea{width:100%;border:none;border-radius:var(--radius);padding:10px;background:#0e1524;color:var(--text)}
 .modal .qty{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
-.modal .qty button{background:var(--gold);color:var(--bg);border:none;width:32px;height:32px;border-radius:6px;font-size:1rem;cursor:pointer}
-.modal .btn-add{width:calc(100% - 30px);margin:0 15px;background:var(--gold);color:var(--bg);font-weight:600;padding:12px;border:none;border-radius:var(--radius);cursor:pointer;font-size:1rem}
+.modal .qty button{background:var(--gold);color:var(--bg);border:none;width:32px;height:32px;border-radius:6px;cursor:pointer}
+.modal .btn-add{display:block;width:calc(100% - 30px);margin:0 15px;background:var(--gold);color:var(--bg);font-weight:600;padding:12px;border:none;border-radius:var(--radius);cursor:pointer;font-size:1rem}
 .modal .close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:1.6rem;color:var(--text);cursor:pointer}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-
-@media(max-width:600px){
-  main{grid-template-columns:repeat(2,1fr);gap:12px}
-  .card img{height:120px}
-}
 </style>
 </head>
 <body>
@@ -53,11 +47,10 @@ main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250p
 
 <main>
   <div class="card" id="card-prato">
-    <span class="badge">Mais Pedido</span>
-    <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true" alt="Monte Seu Prato">
+    <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true">
     <div class="card-content">
       <h2>Monte Seu Prato</h2>
-      <p>Monte seu prato com saladas, proteínas, arroz, feijão e adicionais.</p>
+      <p>Monte seu prato completo com suas escolhas favoritas!</p>
       <div class="price">R$ 45,00</div>
     </div>
   </div>
@@ -66,58 +59,70 @@ main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250p
 <div class="modal-bg" id="modal-bg">
   <div class="modal" id="modal">
     <button class="close" id="close">&times;</button>
-    <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true" alt="Monte Seu Prato">
+    <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true">
     <h2>Monte Seu Prato</h2>
     <p class="price">R$ 45,00</p>
-
-    <section>
-      <h3>Salada <span style="font-size:.8rem;color:#ef4444;">(obrigatório)</span></h3>
-      <label><input type="checkbox"> Cenoura</label>
-      <label><input type="checkbox"> Couve-flor</label>
-      <label><input type="checkbox"> Rúcula</label>
-    </section>
-
-    <section>
-      <h3>Proteínas <span style="font-size:.8rem;color:#ef4444;">(obrigatório)</span></h3>
-      <label><input type="radio" name="prot"> Alcatra</label>
-      <label><input type="radio" name="prot"> Maminha</label>
-      <label><input type="radio" name="prot"> Linguiça</label>
-      <label><input type="radio" name="prot"> Não desejo</label>
-    </section>
-
-    <section>
-      <h3>Adicional de proteína</h3>
-      <label><input type="checkbox"> Alcatra (100g) + R$ 17,90</label>
-      <label><input type="checkbox"> Maminha (100g) + R$ 12,50</label>
-      <label><input type="checkbox"> Frango (1 Unidade) + R$ 10,85</label>
-    </section>
-
-    <section>
-      <h3>Observações</h3>
-      <textarea placeholder="Ex: sem tomate, sem ervilha..."></textarea>
-    </section>
-
+    <div id="blocos"></div>
     <div class="qty">
-      <button id="minus">−</button>
-      <span id="quant">1</span>
-      <button id="plus">+</button>
+      <button id="minus">−</button><span id="quant">1</span><button id="plus">+</button>
     </div>
-
-    <button class="btn-add">Adicionar ao pedido R$ 45,00</button>
+    <button class="btn-add">Adicionar ao pedido</button>
   </div>
 </div>
 
 <script>
-const modalBg=document.getElementById('modal-bg');
-document.getElementById('card-prato').onclick=()=>modalBg.style.display='flex';
+const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
+const modalBg = document.getElementById('modal-bg');
+const blocos = document.getElementById('blocos');
+document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
-modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';}
+modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
 
 // contador
 let q=1;
 const qEl=document.getElementById('quant');
 document.getElementById('plus').onclick=()=>{q++;qEl.textContent=q};
 document.getElementById('minus').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
+
+async function abrirModal(){
+  modalBg.style.display='flex';
+  blocos.innerHTML='<p style="text-align:center;color:var(--muted)">Carregando...</p>';
+  const r=await fetch(`${URL_API}?acao=listarItens`);
+  const data=await r.json();
+  if(!data.sucesso)return;
+  blocos.innerHTML='';
+  Object.entries(data.categorias).forEach(([cat,info])=>{
+    const sec=document.createElement('section');
+    sec.innerHTML=`<h3>${cat}</h3>`;
+    let count=0;
+    info.itens.forEach((it,i)=>{
+      const id=`${cat}_${i}`;
+      const input=document.createElement('input');
+      input.type=info.tipo;
+      input.name=cat;
+      input.id=id;
+      input.onclick=()=>{
+        const selecionados=[...sec.querySelectorAll('input:checked')];
+        if(selecionados.length>=info.maximo){
+          sec.querySelectorAll('input:not(:checked)').forEach(n=>n.disabled=true);
+          const next=sec.nextElementSibling;
+          if(next)next.scrollIntoView({behavior:'smooth'});
+        }else{
+          sec.querySelectorAll('input').forEach(n=>n.disabled=false);
+        }
+      };
+      const label=document.createElement('label');
+      label.appendChild(input);
+      label.append(' '+it.nome+(it.adicional>0?` (+R$ ${it.adicional})`:''));
+      sec.appendChild(label);
+    });
+    const lim=document.createElement('div');
+    lim.className='limit-info';
+    lim.textContent=`Selecione de ${info.minimo} a ${info.maximo}`;
+    sec.appendChild(lim);
+    blocos.appendChild(sec);
+  });
+}
 </script>
 
 </body>
