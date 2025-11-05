@@ -134,7 +134,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
-const CACHE_KEY = "monte_prato_cache_v3";
+const CACHE_KEY = "monte_prato_cache_v4";
 const CACHE_TIME = 3 * 60 * 60 * 1000; // 3 horas
 
 let cachedData = null;
@@ -182,6 +182,7 @@ function abrirModal(){
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
   if(!cachedData){faltamEl.textContent='Erro ao carregar dados.';return;}
   montarBlocos(cachedData);
+  atualizarPreco();
 }
 
 function montarBlocos(data){
@@ -199,7 +200,7 @@ function montarBlocos(data){
       input.type="checkbox";
       input.name=categoria;
       input.id=id;
-      input.dataset.adicional=item.adicional||0;
+      input.dataset.adicional=parseFloat(item.adicional||0);
       input.onclick=()=>gerenciarSelecao(input,sec,info,i);
       const label=document.createElement('label');
       label.className='option';
@@ -236,11 +237,10 @@ function gerenciarSelecao(input,sec,info,i){
 
 function atualizarPreco(){
   totalAdicionais = [...blocos.querySelectorAll('input:checked')]
-    .reduce((soma,el)=>soma+Number(el.dataset.adicional||0),0);
+    .reduce((soma,el)=>soma + Number(el.dataset.adicional||0),0);
   const total = (precoBase + totalAdicionais) * q;
   btnAdd.textContent=`ADICIONAR AO PEDIDO R$ ${total.toFixed(2).replace('.',',')}`;
 }
-
 function atualizarStatus(){
   const ok = [...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
   const faltam = totalObrigatorias - ok;
@@ -256,6 +256,5 @@ function atualizarStatus(){
   }
 }
 </script>
-
 </body>
 </html>
