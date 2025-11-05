@@ -88,7 +88,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API="https://script.google.com/macros/s/AKfycbyMykNvWZAAjwQPiyQ1vyvYKfPdFiuylhfwSlOmKqALCUFMcPHj9SZQ0IxDcA7Qv85mqQ/exec";
-const CACHE_KEY="monte_prato_cache_v7";
+const CACHE_KEY="monte_prato_cache_v9";
 const CACHE_TIME=3*60*60*1000;
 let cachedData=null,totalObrigatorias=0;
 let precoBase=45.00,totalAdicionais=0,q=1;
@@ -151,45 +151,3 @@ function montarBlocos(data){
       label.className='option';
       label.appendChild(input);
       label.append(' '+item.nome+(item.adicional>0?` (+R$ ${item.adicional.toFixed(2).replace('.',',')})`:''));
-      sec.appendChild(label);
-    });
-    const lim=document.createElement('div');
-    lim.className='limit-info';
-    lim.textContent=`Limite: ${info.maximo}`;
-    sec.appendChild(lim);
-    blocos.appendChild(sec);
-  });
-  atualizarStatus();
-}
-
-// ===== SELEÇÃO =====
-function gerenciarSelecao(input,sec,info,i){
-  const selecionados=[...sec.querySelectorAll('input:checked')];
-  const qt=selecionados.length;
-  document.getElementById(`sel_${i}`).textContent=qt;
-  if(qt>=info.maximo){
-    sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=true);
-    const prox=sec.nextElementSibling;if(prox)prox.scrollIntoView({behavior:'smooth'});
-  }else sec.querySelectorAll('input').forEach(el=>el.disabled=false);
-  sec.dataset.ok=qt>=info.minimo?'1':'0';
-  atualizarStatus();atualizarPreco();
-}
-
-// ===== PREÇO =====
-function atualizarPreco(){
-  totalAdicionais=[...blocos.querySelectorAll('input:checked')]
-    .reduce((soma,el)=>soma+Number(el.dataset.adicional||0),0);
-  const total=(precoBase+totalAdicionais)*q;
-  btnAdd.textContent=`ADICIONAR AO PEDIDO R$ ${total.toFixed(2).replace('.',',')}`;
-}
-
-// ===== STATUS =====
-function atualizarStatus(){
-  const ok=[...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
-  const faltam=totalObrigatorias-ok;
-  if(faltam<=0){faltamEl.style.display='none';btnAdd.classList.add('btn-active');btnAdd.disabled=false;}
-  else{faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;faltamEl.style.display='block';btnAdd.classList.remove('btn-active');btnAdd.disabled=true;}
-}
-</script>
-</body>
-</html>
