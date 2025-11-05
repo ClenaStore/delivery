@@ -3,42 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Delivery Delícia Gourmet</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<title>Monte Seu Prato - Delícia Gourmet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0f19;--card:#151b28;--gold:#b8860b;
-  --text:#f8fafc;--muted:#a5b1c2;--radius:18px;
+  --white:#ffffff;
+  --black:#0b0f19;
+  --orange:#ff7b00;
+  --red:#e53935;
+  --gray:#f6f6f6;
+  --text:#1e293b;
+  --radius:14px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
-header{text-align:center;padding:20px;border-bottom:1px solid rgba(255,255,255,.1)}
-header h1{color:var(--gold);font-family:'Playfair Display',serif}
-main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;max-width:1100px;margin:auto}
-.card{background:var(--card);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
-.card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.4)}
-.card img{width:100%;height:160px;object-fit:cover}
-.card-content{padding:15px}
-.card-content h2{font-size:1.1rem;margin-bottom:6px}
-.card-content p{color:var(--muted);font-size:.9rem;margin-bottom:10px;height:36px;overflow:hidden}
-.card-content .price{color:var(--gold);font-weight:600;font-size:1.1rem;text-align:right}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--gray);color:var(--text);min-height:100vh;}
+header{text-align:center;padding:20px;background:var(--black);color:var(--white);}
+header h1{font-size:1.6rem;font-weight:600;letter-spacing:1px;}
+main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;padding:20px;max-width:1000px;margin:auto;}
+.card{background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,0.08);cursor:pointer;transition:.2s;}
+.card:hover{transform:translateY(-3px);}
+.card img{width:100%;height:160px;object-fit:cover;}
+.card-content{padding:15px;}
+.card-content h2{font-size:1.1rem;margin-bottom:4px;}
+.card-content p{color:#64748b;font-size:.9rem;margin-bottom:8px;}
+.price{font-weight:600;color:var(--orange);font-size:1rem;}
 
 /* Modal */
-.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:10}
-.modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow-y:auto;padding-bottom:20px;position:relative;animation:fadeIn .3s}
-.modal img{width:100%;height:200px;object-fit:cover;border-radius:var(--radius) var(--radius) 0 0}
-.modal h2{margin:15px;font-size:1.3rem;color:var(--text)}
-.modal p.price{color:var(--gold);font-weight:600;margin:0 15px 10px}
-.modal section{margin:0 15px 15px;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:10px}
-.modal section h3{color:var(--gold);margin-bottom:8px}
-.modal label{display:block;margin:4px 0;cursor:pointer}
-.modal .limit-info{font-size:.8rem;color:#ef4444;text-align:right;margin-top:6px}
-.modal textarea{width:100%;border:none;border-radius:var(--radius);padding:10px;background:#0e1524;color:var(--text)}
-.modal .qty{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
-.modal .qty button{background:var(--gold);color:var(--bg);border:none;width:32px;height:32px;border-radius:6px;cursor:pointer}
-.modal .btn-add{display:block;width:calc(100% - 30px);margin:0 15px;background:var(--gold);color:var(--bg);font-weight:600;padding:12px;border:none;border-radius:var(--radius);cursor:pointer;font-size:1rem}
-.modal .close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:1.6rem;color:var(--text);cursor:pointer}
-@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:10;}
+.modal{background:var(--white);border-radius:10px;width:95%;max-width:520px;max-height:90vh;overflow-y:auto;animation:fadeIn .25s ease;}
+.modal img{width:100%;height:200px;object-fit:cover;}
+.modal-content{padding:20px;}
+.modal h2{font-size:1.2rem;margin:10px 0;color:var(--black);}
+.modal .price{color:var(--orange);font-size:1.1rem;margin-bottom:5px;}
+.modal small{color:var(--red);font-size:.8rem;}
+section{margin:20px 0;}
+section h3{color:var(--black);font-size:1rem;margin-bottom:6px;}
+section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
+.option{display:flex;align-items:center;gap:8px;margin:5px 0;}
+.option input{accent-color:var(--orange);}
+.option label{cursor:pointer;}
+.limit-info{text-align:right;font-size:.8rem;color:var(--red);}
+#faltam{text-align:center;color:var(--red);margin-top:8px;font-size:.9rem;font-weight:600;}
+.qty-area{display:flex;justify-content:center;align-items:center;gap:15px;margin:20px 0;}
+.qty-area button{width:32px;height:32px;border:none;border-radius:6px;background:var(--orange);color:var(--white);font-size:1rem;cursor:pointer;}
+#quant{font-weight:600;font-size:1.1rem;}
+.btn-add{width:100%;padding:12px;background:#ddd;color:#999;border:none;border-radius:var(--radius);font-weight:600;text-transform:uppercase;cursor:not-allowed;}
+.btn-active{background:var(--orange);color:var(--white);cursor:pointer;}
+.close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.8rem;color:var(--white);cursor:pointer;z-index:20;}
+@keyframes fadeIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+@media(max-width:600px){
+ main{grid-template-columns:repeat(2,1fr);gap:12px;}
+ .card img{height:120px;}
+}
 </style>
 </head>
 <body>
@@ -50,7 +66,7 @@ main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250p
     <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true">
     <div class="card-content">
       <h2>Monte Seu Prato</h2>
-      <p>Monte seu prato completo com suas escolhas favoritas!</p>
+      <p>Monte sua refeição com ingredientes selecionados.</p>
       <div class="price">R$ 45,00</div>
     </div>
   </div>
@@ -59,69 +75,112 @@ main{padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250p
 <div class="modal-bg" id="modal-bg">
   <div class="modal" id="modal">
     <button class="close" id="close">&times;</button>
-    <img src="https://github.com/ClenaStore/delivery/blob/main/paste/Captura%20de%20tela%202025-11-05%20101949.png?raw=true">
-    <h2>Monte Seu Prato</h2>
-    <p class="price">R$ 45,00</p>
-    <div id="blocos"></div>
-    <div class="qty">
-      <button id="minus">−</button><span id="quant">1</span><button id="plus">+</button>
+    <img src="https://github.com/ClenaStore/cardapiomercatto/blob/main/promocoes/churrasco.png?raw=true">
+    <div class="modal-content">
+      <h2>Monte Seu Prato</h2>
+      <p class="price">R$ 45,00</p>
+      <small>🍽️ Delícia Gourmet - Almoço</small>
+      <hr style="border:0;border-top:1px solid #eee;margin:12px 0;">
+      <div id="blocos"></div>
+      <div id="faltam">Ainda faltam 4 seções obrigatórias</div>
+      <div class="qty-area">
+        <button id="menos">−</button>
+        <span id="quant">1</span>
+        <button id="mais">+</button>
+      </div>
+      <button id="btnAdd" class="btn-add">ADICIONAR AO PEDIDO R$ 45,00</button>
     </div>
-    <button class="btn-add">Adicionar ao pedido</button>
   </div>
 </div>
 
 <script>
+// URL do seu Web App
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
+
+// referências
 const modalBg = document.getElementById('modal-bg');
 const blocos = document.getElementById('blocos');
-document.getElementById('card-prato').onclick=()=>abrirModal();
-document.getElementById('close').onclick=()=>modalBg.style.display='none';
-modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
+const faltamEl = document.getElementById('faltam');
+const btnAdd = document.getElementById('btnAdd');
+let totalObrigatorias = 0;
+let completas = 0;
 
-// contador
+document.getElementById('card-prato').onclick = abrirModal;
+document.getElementById('close').onclick = ()=>modalBg.style.display='none';
+modalBg.onclick = e=>{if(e.target===modalBg)modalBg.style.display='none';};
+
+// quantidade
 let q=1;
 const qEl=document.getElementById('quant');
-document.getElementById('plus').onclick=()=>{q++;qEl.textContent=q};
-document.getElementById('minus').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
+document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q};
+document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
 
+// abre modal e carrega itens
 async function abrirModal(){
   modalBg.style.display='flex';
-  blocos.innerHTML='<p style="text-align:center;color:var(--muted)">Carregando...</p>';
+  blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
+  completas=0;
+  btnAdd.classList.remove('btn-active');
+  btnAdd.disabled=true;
+  faltamEl.style.display='block';
   const r=await fetch(`${URL_API}?acao=listarItens`);
   const data=await r.json();
-  if(!data.sucesso)return;
   blocos.innerHTML='';
-  Object.entries(data.categorias).forEach(([cat,info])=>{
+  totalObrigatorias = Object.keys(data.categorias).length;
+
+  Object.entries(data.categorias).forEach(([categoria,info],i)=>{
     const sec=document.createElement('section');
-    sec.innerHTML=`<h3>${cat}</h3>`;
-    let count=0;
-    info.itens.forEach((it,i)=>{
-      const id=`${cat}_${i}`;
+    sec.innerHTML=`<h3>${categoria}</h3>
+      <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
+    let selecionados=0;
+    info.itens.forEach((item,j)=>{
+      const id=`${categoria}_${j}`;
       const input=document.createElement('input');
       input.type=info.tipo;
-      input.name=cat;
+      input.name=categoria;
       input.id=id;
-      input.onclick=()=>{
-        const selecionados=[...sec.querySelectorAll('input:checked')];
-        if(selecionados.length>=info.maximo){
-          sec.querySelectorAll('input:not(:checked)').forEach(n=>n.disabled=true);
-          const next=sec.nextElementSibling;
-          if(next)next.scrollIntoView({behavior:'smooth'});
-        }else{
-          sec.querySelectorAll('input').forEach(n=>n.disabled=false);
+      input.onchange=()=>{
+        const grupo=[...sec.querySelectorAll('input:checked')];
+        selecionados=grupo.length;
+        document.getElementById(`sel_${i}`).textContent=selecionados;
+        const bloqueio = selecionados>=info.maximo;
+        sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=bloqueio);
+        if(selecionados>=info.minimo) {
+          sec.dataset.ok='1';
+        } else sec.dataset.ok='0';
+        atualizarStatus();
+        if(bloqueio){
+          const prox=sec.nextElementSibling;
+          if(prox)prox.scrollIntoView({behavior:'smooth'});
         }
       };
       const label=document.createElement('label');
+      label.className='option';
       label.appendChild(input);
-      label.append(' '+it.nome+(it.adicional>0?` (+R$ ${it.adicional})`:''));
+      label.append(' '+item.nome+(item.adicional>0?` (+R$ ${item.adicional})`:''));
       sec.appendChild(label);
     });
     const lim=document.createElement('div');
     lim.className='limit-info';
-    lim.textContent=`Selecione de ${info.minimo} a ${info.maximo}`;
+    lim.textContent=info.maximo>0?`Limite: ${info.maximo}`:'';
     sec.appendChild(lim);
     blocos.appendChild(sec);
   });
+}
+
+function atualizarStatus(){
+  const ok = [...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
+  const faltam = totalObrigatorias-ok;
+  if(faltam<=0){
+    faltamEl.style.display='none';
+    btnAdd.classList.add('btn-active');
+    btnAdd.disabled=false;
+  }else{
+    faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;
+    faltamEl.style.display='block';
+    btnAdd.classList.remove('btn-active');
+    btnAdd.disabled=true;
+  }
 }
 </script>
 
