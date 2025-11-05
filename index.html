@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Monte Seu Prato - Delícia Gourmet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --white:#ffffff;
@@ -39,8 +40,11 @@ main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2
 section{margin:20px 0;}
 section h3{color:var(--black);font-size:1rem;margin-bottom:6px;}
 section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
-.option{display:flex;align-items:center;gap:8px;margin:5px 0;}
-.option input{accent-color:var(--orange);}
+.option{display:flex;align-items:center;gap:8px;margin:6px 0;}
+.option input[type="radio"]{accent-color:var(--orange);cursor:pointer;appearance:none;width:18px;height:18px;border:2px solid #ccc;border-radius:50%;position:relative;outline:none;}
+.option input[type="radio"]:checked{border-color:var(--orange);}
+.option input[type="radio"]::before{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:var(--orange);opacity:0;transition:.2s;}
+.option input[type="radio"]:checked::before{opacity:1;}
 .option label{cursor:pointer;}
 .limit-info{text-align:right;font-size:.8rem;color:var(--red);}
 #faltam{text-align:center;color:var(--red);margin-top:8px;font-size:.9rem;font-weight:600;}
@@ -51,6 +55,8 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 .btn-active{background:var(--orange);color:var(--white);cursor:pointer;}
 .close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.8rem;color:var(--white);cursor:pointer;z-index:20;}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+
+/* Responsivo */
 @media(max-width:600px){
  main{grid-template-columns:repeat(2,1fr);gap:12px;}
  .card img{height:120px;}
@@ -82,7 +88,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
       <small>🍽️ Delícia Gourmet - Almoço</small>
       <hr style="border:0;border-top:1px solid #eee;margin:12px 0;">
       <div id="blocos"></div>
-      <div id="faltam">Ainda faltam 4 seções obrigatórias</div>
+      <div id="faltam">Carregando...</div>
       <div class="qty-area">
         <button id="menos">−</button>
         <span id="quant">1</span>
@@ -94,66 +100,70 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 </div>
 
 <script>
-// URL do seu Web App
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
+const CACHE_KEY = "monte_prato_cache_v1";
+const CACHE_TIME = 3 * 60 * 60 * 1000; // 3 horas
 
-// referências
-const modalBg = document.getElementById('modal-bg');
-const blocos = document.getElementById('blocos');
-const faltamEl = document.getElementById('faltam');
-const btnAdd = document.getElementById('btnAdd');
+let cachedData = null;
 let totalObrigatorias = 0;
-let completas = 0;
 
-document.getElementById('card-prato').onclick = abrirModal;
-document.getElementById('close').onclick = ()=>modalBg.style.display='none';
-modalBg.onclick = e=>{if(e.target===modalBg)modalBg.style.display='none';};
+// carregar itens logo no início
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const cache = localStorage.getItem(CACHE_KEY);
+  if(cache){
+    const {data, time} = JSON.parse(cache);
+    if(Date.now() - time < CACHE_TIME){
+      cachedData = data;
+      console.log("✅ Itens carregados do cache.");
+      return;
+    }
+  }
+  console.log("🔄 Consultando dados do GAS...");
+  const r = await fetch(`${URL_API}?acao=listarItens`);
+  const data = await r.json();
+  cachedData = data;
+  localStorage.setItem(CACHE_KEY, JSON.stringify({data, time:Date.now()}));
+});
 
-// quantidade
+// Referências principais
+const modalBg=document.getElementById('modal-bg');
+const blocos=document.getElementById('blocos');
+const faltamEl=document.getElementById('faltam');
+const btnAdd=document.getElementById('btnAdd');
 let q=1;
 const qEl=document.getElementById('quant');
+
+// Controles
+document.getElementById('card-prato').onclick=()=>abrirModal();
+document.getElementById('close').onclick=()=>modalBg.style.display='none';
+modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
 document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q};
 document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
 
-// abre modal e carrega itens
-async function abrirModal(){
+// Monta o modal com os dados pré-carregados
+function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
-  completas=0;
-  btnAdd.classList.remove('btn-active');
-  btnAdd.disabled=true;
-  faltamEl.style.display='block';
-  const r=await fetch(`${URL_API}?acao=listarItens`);
-  const data=await r.json();
+  if(!cachedData){faltamEl.textContent='Erro ao carregar dados.';return;}
+  montarBlocos(cachedData);
+}
+
+function montarBlocos(data){
   blocos.innerHTML='';
   totalObrigatorias = Object.keys(data.categorias).length;
-
   Object.entries(data.categorias).forEach(([categoria,info],i)=>{
     const sec=document.createElement('section');
+    sec.dataset.ok='0';
     sec.innerHTML=`<h3>${categoria}</h3>
-      <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
+    <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
     let selecionados=0;
     info.itens.forEach((item,j)=>{
       const id=`${categoria}_${j}`;
       const input=document.createElement('input');
-      input.type=info.tipo;
+      input.type="radio";
       input.name=categoria;
       input.id=id;
-      input.onchange=()=>{
-        const grupo=[...sec.querySelectorAll('input:checked')];
-        selecionados=grupo.length;
-        document.getElementById(`sel_${i}`).textContent=selecionados;
-        const bloqueio = selecionados>=info.maximo;
-        sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=bloqueio);
-        if(selecionados>=info.minimo) {
-          sec.dataset.ok='1';
-        } else sec.dataset.ok='0';
-        atualizarStatus();
-        if(bloqueio){
-          const prox=sec.nextElementSibling;
-          if(prox)prox.scrollIntoView({behavior:'smooth'});
-        }
-      };
+      input.onclick=()=>toggleRadio(input,sec,info,i);
       const label=document.createElement('label');
       label.className='option';
       label.appendChild(input);
@@ -166,11 +176,28 @@ async function abrirModal(){
     sec.appendChild(lim);
     blocos.appendChild(sec);
   });
+  atualizarStatus();
+}
+
+function toggleRadio(input,sec,info,i){
+  // permite desmarcar radio (toggle)
+  if(input.wasChecked){
+    input.checked=false;
+    input.wasChecked=false;
+  }else{
+    sec.querySelectorAll('input').forEach(r=>r.wasChecked=false);
+    input.wasChecked=true;
+  }
+
+  const selecionados=[...sec.querySelectorAll('input:checked')].length;
+  document.getElementById(`sel_${i}`).textContent=selecionados;
+  sec.dataset.ok = selecionados >= info.minimo ? '1' : '0';
+  atualizarStatus();
 }
 
 function atualizarStatus(){
   const ok = [...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
-  const faltam = totalObrigatorias-ok;
+  const faltam = totalObrigatorias - ok;
   if(faltam<=0){
     faltamEl.style.display='none';
     btnAdd.classList.add('btn-active');
