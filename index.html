@@ -88,54 +88,51 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API="https://script.google.com/macros/s/AKfycbyMykNvWZAAjwQPiyQ1vyvYKfPdFiuylhfwSlOmKqALCUFMcPHj9SZQ0IxDcA7Qv85mqQ/exec";
-const CACHE_KEY="monte_prato_cache_v10";
+const CACHE_KEY="monte_prato_cache_v12";
 const CACHE_TIME=3*60*60*1000;
 let cachedData=null,totalObrigatorias=0;
 let precoBase=45.00,totalAdicionais=0,q=1;
 
-// ===== PRÉ-CARREGAR DADOS =====
+// ========== CARREGAMENTO AUTOMÁTICO ==========
+window.addEventListener('DOMContentLoaded',carregarDados);
 async function carregarDados(){
-  const cache=localStorage.getItem(CACHE_KEY);
-  if(cache){
-    const {data,time}=JSON.parse(cache);
-    if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
-  }
-  const r=await fetch(`${URL_API}?acao=listarItens`);
-  const data=await r.json();
-  cachedData=data;
-  localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+  try{
+    const cache=localStorage.getItem(CACHE_KEY);
+    if(cache){
+      const {data,time}=JSON.parse(cache);
+      if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
+    }
+    const r=await fetch(`${URL_API}?acao=listarItens`);
+    const data=await r.json();
+    cachedData=data;
+    localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+  }catch(e){console.error("Erro ao carregar itens:",e);}
 }
 
-// ===== REFERÊNCIAS =====
+// ========== REFERÊNCIAS ==========
 const modalBg=document.getElementById('modal-bg');
 const blocos=document.getElementById('blocos');
 const faltamEl=document.getElementById('faltam');
 const btnAdd=document.getElementById('btnAdd');
 const qEl=document.getElementById('quant');
+
+// ========== EVENTOS ==========
+document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
 modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
-
-// ===== CONTROLES DE QUANTIDADE =====
 document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q;atualizarPreco()};
 document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q;atualizarPreco()}};
 
-// ===== EVENTO DO CARD =====
-document.getElementById('card-prato').addEventListener('click',async()=>{
-  if(!cachedData) await carregarDados();
-  abrirModal();
-});
-
-// ===== ABRIR MODAL =====
+// ========== ABRIR MODAL ==========
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
-  faltamEl.style.display='none';
-  if(!cachedData){blocos.innerHTML='<p style="color:red;text-align:center;">Erro ao carregar dados.</p>';return;}
-  montarBlocos(cachedData);
+  if(cachedData) montarBlocos(cachedData);
+  else faltamEl.style.display='block';
   atualizarPreco();
 }
 
-// ===== MONTAR AS CATEGORIAS =====
+// ========== MONTAR SEÇÕES ==========
 function montarBlocos(data){
   blocos.innerHTML='';
   totalObrigatorias=Object.keys(data.categorias).length;
@@ -143,7 +140,7 @@ function montarBlocos(data){
     const sec=document.createElement('section');
     sec.dataset.ok='0';
     sec.innerHTML=`<h3>${categoria}</h3>
-    <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
+      <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
     info.itens.forEach((item,j)=>{
       const id=`${categoria}_${j}`;
       const input=document.createElement('input');
