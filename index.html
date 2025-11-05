@@ -88,23 +88,16 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API="https://script.google.com/macros/s/AKfycbyMykNvWZAAjwQPiyQ1vyvYKfPdFiuylhfwSlOmKqALCUFMcPHj9SZQ0IxDcA7Qv85mqQ/exec";
-const CACHE_KEY="monte_prato_cache_v9";
+const CACHE_KEY="monte_prato_cache_v10";
 const CACHE_TIME=3*60*60*1000;
 let cachedData=null,totalObrigatorias=0;
 let precoBase=45.00,totalAdicionais=0,q=1;
 
 // ===== PRÉ-CARREGAR =====
 document.addEventListener("DOMContentLoaded",async()=>{
-  const cache=localStorage.getItem(CACHE_KEY);
-  if(cache){
-    const {data,time}=JSON.parse(cache);
-    if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
-  }
   try{
     const r=await fetch(`${URL_API}?acao=listarItens`);
-    const data=await r.json();
-    cachedData=data;
-    localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+    cachedData=await r.json();
   }catch(e){console.error("Erro ao carregar dados",e);}
 });
 
@@ -124,7 +117,6 @@ document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q;atua
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
-  faltamEl.style.display='none';
   if(!cachedData){blocos.innerHTML='<p style="color:red;text-align:center;">Erro ao carregar dados.</p>';return;}
   montarBlocos(cachedData);
   atualizarPreco();
@@ -146,8 +138,5 @@ function montarBlocos(data){
       input.name=categoria;
       input.id=id;
       input.dataset.adicional=parseFloat(item.adicional||0);
-      input.onclick=()=>gerenciarSelecao(input,sec,info,i);
-      const label=document.createElement('label');
-      label.className='option';
-      label.appendChild(input);
-      label.append(' '+item.nome+(item.adicional>0?` (+R$ ${item.adicional.toFixed(2).replace('.',',')})`:''));
+      input.addEventListener('change',()=>gerenciarSelecao(sec,info,i));
+     
