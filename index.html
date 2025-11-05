@@ -30,18 +30,9 @@ main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2
 
 /* Modal */
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:10;}
-.modal{
-  background:var(--white);
-  border-radius:10px;
-  width:95%;max-width:520px;
-  height:85vh;
-  overflow-y:auto;
-  margin-top:20px;
-  animation:fadeIn .25s ease;
-  position:relative;
-}
+.modal{background:var(--white);border-radius:10px;width:95%;max-width:520px;max-height:90vh;overflow-y:auto;animation:fadeIn .25s ease;}
 .modal img{width:100%;height:200px;object-fit:cover;}
-.modal-content{padding:20px;padding-top:60px;}
+.modal-content{padding:20px;}
 .modal h2{font-size:1.2rem;margin:10px 0;color:var(--black);}
 .modal .price{color:var(--orange);font-size:1.1rem;margin-bottom:5px;}
 .modal small{color:var(--red);font-size:.8rem;}
@@ -61,20 +52,10 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 #quant{font-weight:600;font-size:1.1rem;}
 .btn-add{width:100%;padding:12px;background:#ddd;color:#999;border:none;border-radius:var(--radius);font-weight:600;text-transform:uppercase;cursor:not-allowed;}
 .btn-active{background:var(--orange);color:var(--white);cursor:pointer;}
-.close{
-  position:fixed;
-  top:12px;right:20px;
-  background:var(--red);
-  border:none;
-  border-radius:50%;
-  width:34px;height:34px;
-  color:var(--white);
-  font-size:1.3rem;
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,0.3);
-  z-index:30;
-}
+.close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.8rem;color:var(--white);cursor:pointer;z-index:20;}
 @keyframes fadeIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+
+/* Responsivo */
 @media(max-width:600px){
  main{grid-template-columns:repeat(2,1fr);gap:12px;}
  .card img{height:120px;}
@@ -102,7 +83,7 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
     <img src="https://github.com/ClenaStore/delivery/blob/main/paste/Captura%20de%20tela%202025-11-05%20101949.png?raw=true">
     <div class="modal-content">
       <h2>Monte Seu Prato</h2>
-      <p class="price" id="precoBase">R$ 45,00</p>
+      <p class="price">R$ 45,00</p>
       <small>🍽️ Delícia Gourmet - Almoço</small>
       <hr style="border:0;border-top:1px solid #eee;margin:12px 0;">
       <div id="blocos"></div>
@@ -119,69 +100,73 @@ section p.sub{font-size:.85rem;color:#64748b;margin-bottom:8px;}
 
 <script>
 const URL_API = "https://script.google.com/macros/s/AKfycbyqTo0EHs_BgkAW7K8BuKX8DpmJD8LDrc89caNgjQmzCoydw1BeE1Ju52dWsAQ46P60Sg/exec";
-const CACHE_KEY = "monte_prato_cache_v3";
-const CACHE_TIME = 3 * 60 * 60 * 1000; // 3h
+const CACHE_KEY = "monte_prato_cache_v2";
+const CACHE_TIME = 3 * 60 * 60 * 1000; // 3 horas
 
-let cachedData=null,totalObrigatorias=0;
-let precoBase=45.00,totalAdicionais=0;
-let q=1;
+let cachedData = null;
+let totalObrigatorias = 0;
 
-// Pré-carrega dados
-document.addEventListener("DOMContentLoaded",async()=>{
-  const cache=localStorage.getItem(CACHE_KEY);
+// ===== PRÉ-CARREGA OS ITENS AO ABRIR O SITE =====
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const cache = localStorage.getItem(CACHE_KEY);
   if(cache){
-    const {data,time}=JSON.parse(cache);
-    if(Date.now()-time<CACHE_TIME){cachedData=data;return;}
+    const {data,time} = JSON.parse(cache);
+    if(Date.now()-time < CACHE_TIME){
+      cachedData = data;
+      console.log("✅ Itens carregados do cache");
+      return;
+    }
   }
-  const r=await fetch(`${URL_API}?acao=listarItens`);
-  const data=await r.json();
-  cachedData=data;
-  localStorage.setItem(CACHE_KEY,JSON.stringify({data,time:Date.now()}));
+  console.log("🔄 Consultando dados do GAS...");
+  const r = await fetch(`${URL_API}?acao=listarItens`);
+  const data = await r.json();
+  cachedData = data;
+  localStorage.setItem(CACHE_KEY, JSON.stringify({data,time:Date.now()}));
 });
 
-// Referências
+// ===== REFERÊNCIAS =====
 const modalBg=document.getElementById('modal-bg');
 const blocos=document.getElementById('blocos');
 const faltamEl=document.getElementById('faltam');
 const btnAdd=document.getElementById('btnAdd');
+let q=1;
 const qEl=document.getElementById('quant');
 
-// Eventos
+// ===== CONTROLES =====
 document.getElementById('card-prato').onclick=()=>abrirModal();
 document.getElementById('close').onclick=()=>modalBg.style.display='none';
 modalBg.onclick=e=>{if(e.target===modalBg)modalBg.style.display='none';};
-document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q;atualizarPreco()};
-document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q;atualizarPreco()}};
+document.getElementById('mais').onclick=()=>{q++;qEl.textContent=q};
+document.getElementById('menos').onclick=()=>{if(q>1){q--;qEl.textContent=q}};
 
-// Monta blocos
+// ===== MONTA OS BLOCOS =====
 function abrirModal(){
   modalBg.style.display='flex';
   blocos.innerHTML='<p style="text-align:center;color:#888;">Carregando opções...</p>';
   if(!cachedData){faltamEl.textContent='Erro ao carregar dados.';return;}
   montarBlocos(cachedData);
-  atualizarPreco();
 }
 
 function montarBlocos(data){
   blocos.innerHTML='';
-  totalObrigatorias=Object.keys(data.categorias).length;
+  totalObrigatorias = Object.keys(data.categorias).length;
+
   Object.entries(data.categorias).forEach(([categoria,info],i)=>{
     const sec=document.createElement('section');
     sec.dataset.ok='0';
     sec.innerHTML=`<h3>${categoria}</h3>
-      <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
+    <p class="sub">Mínimo: ${info.minimo} - Selecionados: <span id="sel_${i}">0</span> / ${info.maximo}</p>`;
     info.itens.forEach((item,j)=>{
       const id=`${categoria}_${j}`;
       const input=document.createElement('input');
-      input.type="checkbox";
+      input.type="checkbox"; // todas "bolinhas"
       input.name=categoria;
       input.id=id;
-      input.dataset.adicional=parseFloat(item.adicional||0);
       input.onclick=()=>gerenciarSelecao(input,sec,info,i);
       const label=document.createElement('label');
       label.className='option';
       label.appendChild(input);
-      label.append(' '+item.nome+(item.adicional>0?` (+R$ ${item.adicional.toFixed(2).replace('.',',')})`:''));
+      label.append(' '+item.nome+(item.adicional>0?` (+R$ ${item.adicional})`:''));
       sec.appendChild(label);
     });
     const lim=document.createElement('div');
@@ -197,27 +182,37 @@ function gerenciarSelecao(input,sec,info,i){
   const selecionados=[...sec.querySelectorAll('input:checked')];
   const qt=selecionados.length;
   document.getElementById(`sel_${i}`).textContent=qt;
-  if(qt>=info.maximo){
-    sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=true);
-    const prox=sec.nextElementSibling;if(prox)prox.scrollIntoView({behavior:'smooth'});
-  }else sec.querySelectorAll('input').forEach(el=>el.disabled=false);
-  sec.dataset.ok=qt>=info.minimo?'1':'0';
-  atualizarStatus();atualizarPreco();
-}
 
-function atualizarPreco(){
-  totalAdicionais=[...blocos.querySelectorAll('input:checked')]
-    .reduce((soma,el)=>soma+Number(el.dataset.adicional||0),0);
-  const total=(precoBase+totalAdicionais)*q;
-  btnAdd.textContent=`ADICIONAR AO PEDIDO R$ ${total.toFixed(2).replace('.',',')}`;
+  if(qt>=info.maximo){
+    // bloqueia os não selecionados
+    sec.querySelectorAll('input:not(:checked)').forEach(el=>el.disabled=true);
+    // vai pro próximo bloco
+    const prox=sec.nextElementSibling;
+    if(prox)prox.scrollIntoView({behavior:'smooth'});
+  } else {
+    // libera novamente se desmarcou
+    sec.querySelectorAll('input').forEach(el=>el.disabled=false);
+  }
+
+  sec.dataset.ok = qt >= info.minimo ? '1' : '0';
+  atualizarStatus();
 }
 
 function atualizarStatus(){
-  const ok=[...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
-  const faltam=totalObrigatorias-ok;
-  if(faltam<=0){faltamEl.style.display='none';btnAdd.classList.add('btn-active');btnAdd.disabled=false;}
-  else{faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;faltamEl.style.display='block';btnAdd.classList.remove('btn-active');btnAdd.disabled=true;}
+  const ok = [...blocos.querySelectorAll('section')].filter(s=>s.dataset.ok==='1').length;
+  const faltam = totalObrigatorias - ok;
+  if(faltam<=0){
+    faltamEl.style.display='none';
+    btnAdd.classList.add('btn-active');
+    btnAdd.disabled=false;
+  }else{
+    faltamEl.textContent=`Ainda faltam ${faltam} seções obrigatórias`;
+    faltamEl.style.display='block';
+    btnAdd.classList.remove('btn-active');
+    btnAdd.disabled=true;
+  }
 }
 </script>
+
 </body>
 </html>
